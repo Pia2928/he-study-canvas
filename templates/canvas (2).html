@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block bodyclass %}canvas-page{% endblock %}
+{% block body %}
+<div class="app">
+    <header class="topbar">
+        <span class="brand">{{ t.canvas_title }}</span>
+        <span class="progress" aria-live="polite"><span class="bar"><span id="barfill"></span></span><span id="progtext"></span></span>
+        <span class="topbar-right">
+            <span id="saved" class="saved" aria-live="polite"></span>
+            <span id="timer" class="timer" aria-label="Time left">--:--</span>
+            <button type="button" id="submit" class="btn small">{{ t.submit }}</button>
+        </span>
+    </header>
+
+    <div class="banner {{ 'banner-ai' if ai else '' }}" role="note">
+        <span class="banner-dot" aria-hidden="true"></span>{{ t.banner_ai if ai else t.banner_noai }}
+    </div>
+
+    <div class="layout">
+        <main class="workarea">
+            <div class="youridea"><span class="label">{{ t.your_idea }}</span> <strong>{{ idea.name }}</strong>
+                <span class="idea-what">{{ idea.what }}</span></div>
+
+            <div class="custom">
+                <label class="namefield"><span>{{ t.name_label }}</span>
+                    <input id="title" type="text" maxlength="80" placeholder="{{ t.name_placeholder }}" value="{{ boxes.title }}"></label>
+                <label class="namefield"><span>{{ t.tagline_label }}</span>
+                    <input id="tagline" type="text" maxlength="140" placeholder="{{ t.tagline_placeholder }}" value="{{ boxes.tagline }}"></label>
+                <div class="swatches" role="radiogroup" aria-label="{{ t.colour_label }}">
+                    <span class="swlabel">{{ t.colour_label }}</span>
+                    {% for th in themes %}
+                    <button type="button" class="swatch" data-theme="{{ th.key }}" role="radio" aria-label="{{ th.name }}"
+                            style="background: {{ th.color }}"></button>
+                    {% endfor %}
+                    <button type="button" id="previewbtn" class="btn small ghost">{{ t.preview }}</button>
+                </div>
+            </div>
+
+            <div class="grid" id="grid"></div>
+            <p class="notice">{{ t.notice }}</p>
+        </main>
+
+        <aside class="bench">
+            <section class="editor" id="editor" aria-live="polite">
+                <p class="ed-step" id="ed-step"></p>
+                <h2 id="ed-title"></h2>
+                <p class="ed-question" id="ed-question"></p>
+                <textarea id="ed-text" maxlength="600" rows="5" placeholder="{{ t.editor_placeholder }}"></textarea>
+                <div class="ed-foot">
+                    <span class="ed-hint" id="ed-hint"></span>
+                    <button type="button" id="ed-done" class="btn small" disabled></button>
+                </div>
+            </section>
+
+            {% if ai %}
+            <section class="chatpanel" aria-label="{{ t.ai_title }}">
+                <div class="chat-head"><span class="pulse" aria-hidden="true"></span>{{ t.ai_title }}</div>
+                <div id="thread" class="thread" role="log" aria-live="polite"></div>
+                <div class="quick">
+                    <button type="button" class="chip-btn" data-quick="more">{{ t.ai_quick_more }}</button>
+                    <button type="button" class="chip-btn" data-quick="feedback">{{ t.ai_quick_feedback }}</button>
+                </div>
+                <form id="chatform" class="composer">
+                    <textarea id="chatinput" rows="1" placeholder="{{ t.ai_placeholder }}"></textarea>
+                    <button type="submit" id="send" aria-label="Send">&#8593;</button>
+                </form>
+                <p class="disclaimer">{{ t.ai_disclaimer }}</p>
+            </section>
+            {% else %}
+            <section class="guide" aria-label="{{ t.guide_title }}">
+                <div class="chat-head">{{ t.guide_title }}</div>
+                <div class="guide-body">
+                    <h3>{{ t.guide_think }}</h3>
+                    <ul id="guide-tips"></ul>
+                    <h3 id="guide-ex-title"></h3>
+                    <p class="example" id="guide-example"></p>
+                </div>
+            </section>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+
+<div id="overlay" class="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title"></h2>
+        <p id="modal-text"></p>
+        <div class="modal-buttons" id="modal-buttons"></div>
+    </div>
+</div>
+
+<div id="preview" class="overlay" hidden>
+    <div class="modal slide-modal" role="dialog" aria-modal="true" aria-label="{{ t.preview_title }}">
+        <div id="slide" class="slide"></div>
+        <div class="modal-buttons"><button type="button" id="preview-close" class="btn small">{{ t.close }}</button></div>
+    </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script>
+window.CANVAS = {
+    pid: {{ pid|tojson }}, ai: {{ 'true' if ai else 'false' }}, secondsLeft: {{ seconds_left }},
+    blocks: {{ blocks|tojson }}, themes: {{ themes|tojson }}, boxes: {{ boxes|tojson }},
+    minFilled: {{ min_filled }}, minWords: {{ min_words }}, exampleBusiness: {{ example_business|tojson }},
+    history: {{ history|tojson }}, t: {{ js_t|tojson }}, doneUrl: {{ url_for('done', pid=pid)|tojson }}
+};
+</script>
+<script src="{{ url_for('static', filename='canvas.js') }}"></script>
+{% endblock %}
