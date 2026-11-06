@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block bodyclass %}slide-view{% endblock %}
+{% block body %}
+<main class="page wide">
+    <p class="meta">{{ pid }} · {{ condition }} · idea: {{ idea.name }}</p>
+    <div class="slide" style="--slide: {{ color }}">
+        <div class="slide-head">
+            <h1>{{ boxes.title or '(no name)' }}</h1>
+            {% if boxes.tagline %}<p class="slide-tag">{{ boxes.tagline }}</p>{% endif %}
+        </div>
+        <div class="slide-grid">
+            {% for b in blocks %}
+            <section class="slide-box">
+                <h3>{{ b.title }}</h3>
+                <p>{{ boxes[b.key] or '—' }}</p>
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+{% endblock %}
