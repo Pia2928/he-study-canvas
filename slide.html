@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block bodyclass %}slide-view{% endblock %}
+{% block body %}
+<main class="page wide">
+    <p class="meta">{{ pid }} · {{ condition }} · idea: {{ idea.name }}</p>
+    <h1>{{ boxes.title or '(no name)' }}</h1>
+    <div class="grid">
+        {% for b in blocks %}
+        <section class="box {% if b.hybrid %}hybrid{% endif %}">
+            <h2>{{ b.title }}</h2>
+            <p class="ro">{{ boxes[b.key] or '—' }}</p>
+        </section>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}
