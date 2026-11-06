@@ -1,0 +1,8 @@
+# Never commit secrets or participant data
+.env
+*.db
+*.db-shm
+*.db-wal
+__pycache__/
+*.pyc
+*.zip
