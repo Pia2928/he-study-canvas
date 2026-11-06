@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="page">
+    <h1>{{ t.intro_title }}</h1>
+    <p class="lead">{{ t.intro_lead }}</p>
+    <ol class="ideas">
+        {% for i in ideas %}
+        <li class="idea {% if loop.index == idea_n %}idea-chosen{% endif %}">
+            <strong>{{ i.name }}</strong>
+            <span>{{ i.what }}</span>
+        </li>
+        {% endfor %}
+    </ol>
+    <section class="task">
+        <p>{{ t.intro_task.format(n=idea_n, name=idea.name) }}</p>
+        <p>{{ t.intro_ai if ai else t.intro_noai }}</p>
+        <p>{{ t.intro_time.format(minutes=minutes) }}</p>
+    </section>
+    <a class="btn" id="start" href="{{ url_for('canvas_page', pid=pid) }}">{{ t.start }}</a>
+    <p class="notice">{{ t.notice }}</p>
+</main>
+{% endblock %}
