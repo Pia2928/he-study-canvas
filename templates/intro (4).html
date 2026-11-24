@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block bodyclass %}intro-body intro-hk{% endblock %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='intro.css') }}">
+<main class="page intro-page">
+    <section class="intro-step hk" id="step1">
+        <header class="hk-hero">
+            <p class="hk-kicker">Online challenge &middot; Side Project Hackathon</p>
+            <h1>Turn your idea into a winning project plan</h1>
+            <p class="hk-tagline">Take a small entrepreneurial project you would like to start on the side and build the strongest plan you can. The best plan is awarded as the challenge winner.</p>
+            <ul class="hk-tags" aria-label="Details"><li>Online</li><li>{{ minutes }} minutes</li><li>Laptop or computer only</li><li>Open to everyone with an idea</li></ul>
+        </header>
+        <div class="hk-grid">
+            <div class="hk-main">
+                <section class="hk-sec">
+                    <h2>Your mission</h2>
+                    <p>Design and develop one small entrepreneurial project that you could realistically pursue on the side, next to your studies or your job. Show who it is for, what you offer and how you would get started.</p>
+                </section>
+                <section class="hk-sec hk-award">
+                    <h2>The award</h2>
+                    <p>{{ award }}</p>
+                </section>
+                <section class="hk-sec">
+                    <h2>How it works</h2>
+                    <ol class="hk-steps">
+                        <li><strong>Describe your idea.</strong> Write it down below. It can still be rough.</li>
+                        <li><strong>Build your plan.</strong> On the next page you are guided through the nine boxes of a one-page project map.</li>
+                        <li><strong>Open for business.</strong> When you finish, or when the time is up, your plan becomes a first version of your project's website, and you continue to a short survey.</li>
+                    </ol>
+                </section>
+                <section class="hk-sec">
+                    <h2>Who can join</h2>
+                    <p>Anyone who has an idea for a small project to start on the side. You take part on your own, on a laptop or desktop computer.</p>
+                </section>
+                <section class="hk-sec hk-idea" id="idea">
+                    <h2>Develop your project idea</h2>
+                    <p class="hk-desc"><label for="ownidea">Please write down a small entrepreneurial idea you'd like to develop. Pick whatever you like. Examples of common ideas are dog walking, Etsy seller, tutoring &hellip;</label></p>
+                    <textarea id="ownidea" rows="4" maxlength="{{ idea_max }}" aria-describedby="ideahint"
+                              placeholder="Describe your idea in a sentence or two: what would you offer, and to whom?">{{ own_idea }}</textarea>
+                    <p class="hk-hint" id="ideahint">Choose a small project you would realistically pursue on the side. It does not have to be perfect.</p>
+                </section>
+            </div>
+            <aside class="hk-side" aria-label="Key information">
+                <div class="hk-card">
+                    <h2>At a glance</h2>
+                    <dl>
+                        <dt>Format</dt><dd>Online challenge, individual</dd>
+                        <dt>Award</dt><dd>{{ award_short }}</dd>
+                        <dt>Time</dt><dd>{{ minutes }} minutes</dd>
+                        <dt>Device</dt><dd>Laptop or desktop computer</dd>
+                        <dt>Your work</dt><dd>Saved automatically</dd>
+                        <dt>Result</dt><dd>A first plan for your project, then a short survey</dd>
+                    </dl>
+                    
+                </div>
+            </aside>
+        </div>
+        <div class="hk-bar"><span class="hk-hint" id="pickhint" role="status"></span>
+            <button type="button" class="btn" id="next" disabled>{{ t.intro_next }}</button></div>
+    </section>
+    <section class="intro-step hk" id="step2" hidden>
+        <header class="hk-hero hk-hero-sm">
+            <p class="hk-kicker">Step 2 of 2 &middot; Your guide</p>
+            <h1>Your plan has nine boxes</h1>
+            <p class="hk-tagline">Your idea: <strong id="tasktext">{{ idea.what if own_idea else "" }}</strong></p>
+        </header>
+        <div class="hk-main hk-wide">
+            <section class="hk-sec">
+                <h2>Fill in the map, one post-it at a time</h2>
+                <p>Each post-it below is one box on your map. Write a few lines about your own idea in each, in any order. You open them on the next page.</p>
+                <ol class="hk-boxes">
+                    {% for b in blocks %}<li><span class="hk-bt">{{ b.title }}</span><span class="hk-bl">{{ b.lean|replace("Lean Canvas: ", "") }}</span><span class="hk-bq">{{ b.question }}</span></li>{% endfor %}
+                </ol>
+            </section>
+            <section class="hk-sec">
+                <h2>Good to know</h2>
+                <ul class="tasklist">
+                    {% if ai %}<li>Compi, an AI co-founder, gives you a quick, concrete tip for every box. You decide what goes into your plan.</li>{% endif %}
+                    <li>You have a maximum of {{ minutes }} minutes. Your work is saved automatically while you work.</li>
+                    <li>If you finish earlier, click <strong>Open for business</strong> at the top right. When you click it, or when time is up, a website for your entrepreneurial project is created and you are taken to the short survey.</li>
+                </ul>
+            </section>
+        </div>
+        <div class="hk-bar">
+            <button type="button" class="btn ghost" id="back">{{ t.intro_back }}</button>
+            <a class="btn" id="start" href="{{ url_for('canvas_page', pid=pid) }}">{{ t.start }}</a>
+        </div>
+    </section>
+</main>
+<script>
+(function () {
+    var pid = {{ pid|tojson }}, minWords = {{ idea_min_words }};
+    var s1 = document.getElementById("step1"), s2 = document.getElementById("step2"), next = document.getElementById("next");
+    var box = document.getElementById("ownidea"), hint = document.getElementById("pickhint"), busy = false;
+    function words() { return box.value.trim().split(/\s+/).filter(Boolean).length; }
+    function refresh() {
+        var n = words();
+        next.disabled = busy || n < minWords;
+        hint.textContent = n < minWords ? "Write your idea to continue" : "";
+    }
+    box.addEventListener("input", refresh);
+    refresh();
+    next.onclick = function () {
+        busy = true; refresh();
+        fetch("/api/idea", { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pid: pid, text: box.value }) })
+            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r || r.error) { throw new Error("save"); }
+                document.getElementById("tasktext").textContent = (r && r.idea) || box.value.trim();
+                s1.hidden = true; s2.hidden = false; window.scrollTo(0, 0);
+            })
+            .catch(function () { hint.textContent = "Could not save your idea. Please try again."; })
+            .then(function () { busy = false; refresh(); });
+    };
+    document.getElementById("back").onclick = function () { s2.hidden = true; s1.hidden = false; window.scrollTo(0, 0); };
+})();
+</script>
+{% endblock %}
