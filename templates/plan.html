@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ boxes.title or "My project plan" }}</title>
+<style>
+body{margin:0;background:#f3f4f8;color:#1c1c28;font:16px/1.5 -apple-system,"Segoe UI",Inter,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:36px 24px 60px}
+h1{margin:0 0 4px;font-size:2rem;letter-spacing:-.02em}
+.tag{margin:0 0 6px;color:#555}.idea{margin:0 0 26px;color:#666;font-size:.95rem}
+ol{list-style:none;counter-reset:b;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+li{counter-increment:b;position:relative;min-height:140px;padding:16px 16px 14px 46px;border-radius:4px;background:#ffe566;box-shadow:0 6px 10px rgba(0,0,0,.12)}
+li:nth-child(5n+2){background:#c6b4ff}li:nth-child(5n+3){background:#b5e48c}li:nth-child(5n+4){background:#9fe3d9}li:nth-child(5n){background:#ffb7d0}
+li::before{content:counter(b);position:absolute;left:13px;top:15px;width:22px;height:22px;border-radius:50%;background:#1c1c28;color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+h2{margin:0 0 6px;font-size:1rem}p.t{margin:0;white-space:pre-wrap}.empty{color:#666}
+@media(max-width:760px){ol{grid-template-columns:1fr}}
+@media print{body{background:#fff}li{box-shadow:none;border:1px solid #bbb;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body><main>
+<h1>{{ boxes.title or "My project plan" }}</h1>
+{% if boxes.tagline %}<p class="tag">{{ boxes.tagline }}</p>{% endif %}
+<p class="idea">Project idea: {{ idea.what or idea.name }}</p>
+<ol>
+{% for b in blocks %}<li><h2>{{ b.title }}</h2>{% if boxes[b.key] %}<p class="t">{{ boxes[b.key] }}</p>{% else %}<p class="t empty">Not filled in yet</p>{% endif %}</li>
+{% endfor %}</ol>
+</main></body></html>
